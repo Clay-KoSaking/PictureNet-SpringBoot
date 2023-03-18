@@ -67,15 +67,18 @@ public class PictureServiceImpl implements PictureServiceInter {
                     List<DeletedPicture> deletedPictureList = deletedPictureRepository.findAll();
                     byte[] bytes = pictureContent.getBytes();
 //                    Timestamp timestamp = new java.sql.Timestamp(new java.util.Date().getTime());
-                    Iterator it = tagNameSet.iterator();
-                    if (!tagNameSet.isEmpty()) {
-                        for (String tagName : tagNameSet) {
-                            Tag foundTag = tagRepository.findTagByTagName(tagName);
-                            if (foundTag == null) {
-                                return false;
+
+                    if (tagNameSet != null) {
+                        if (!tagNameSet.isEmpty()) {
+                            for (String tagName : tagNameSet) {
+                                Tag foundTag = tagRepository.findTagByTagName(tagName);
+                                if (foundTag == null) {
+                                    return false;
+                                }
                             }
                         }
                     }
+
                     CheckingPicture checkingPicture = new CheckingPicture();
                     checkingPicture.setPictureAuthorId(pictureAuthorId);
                     checkingPicture.setPictureName(pictureName);
@@ -139,14 +142,19 @@ public class PictureServiceImpl implements PictureServiceInter {
                     checkingPictureRepository.save(checkingPicture);
 
                     Integer cnt = checkingPictureRepository.findAll().size();
-                    while (it.hasNext()) {
-                        String tagName = (String) it.next();
-                        Tag foundTag = tagRepository.findTagByTagName(tagName);
-                        CheckingPictureTag checkingPictureTag = new CheckingPictureTag();
-                        checkingPictureTag.setCheckingPictureId(cnt);
-                        checkingPictureTag.setCheckingPictureTagId(foundTag.getTagId());
-                        checkingPictureTagRepository.save(checkingPictureTag);
+
+                    if (tagNameSet != null) {
+                        Iterator it = tagNameSet.iterator();
+                        while (it.hasNext()) {
+                            String tagName = (String) it.next();
+                            Tag foundTag = tagRepository.findTagByTagName(tagName);
+                            CheckingPictureTag checkingPictureTag = new CheckingPictureTag();
+                            checkingPictureTag.setCheckingPictureId(cnt);
+                            checkingPictureTag.setCheckingPictureTagId(foundTag.getTagId());
+                            checkingPictureTagRepository.save(checkingPictureTag);
+                        }
                     }
+
                     return true;
                 }
             }
